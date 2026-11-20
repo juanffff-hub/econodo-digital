@@ -184,6 +184,8 @@ La base real se crea automáticamente en `data/econodo.sqlite3`. Comenzará vac�
 4. Reinicia el servidor. Abre `http://IP_DEL_SERVIDOR:5000` desde **otro dispositivo** conectado a esa misma red.
 5. Abre `/acceso`: contiene URL y QR para imprimir. Solo imprímelo después de comprobar que abre desde otro dispositivo. El QR **no conecta al Wi-Fi**; los visitantes deben unirse antes a la red.
 
+**¿Visitantes fuera del hotspot o QR impreso fijo?** Ver [PUBLICAR_INTERNET.md](PUBLICAR_INTERNET.md): `publicar.ps1` publica una dirección HTTPS fija de solo lectura con Tailscale Funnel.
+
 `config.local.json` se excluye de Git. `node_key` es opcional para explorar localmente, pero conviene configurarla para el piloto: el ESP32 enviará el mismo valor en `X-EcoNodo-Key`. El acceso de lectura al sitio sigue sujeto al control de la red WPA2. Este servidor HTTP está pensado para una LAN controlada, no para exponerse directamente a internet.
 
 ## Integrar la carcasa y el nodo más adelante

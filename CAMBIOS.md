@@ -4,6 +4,10 @@
 
 Actualización posterior al rediseño descrito abajo: recepción del JSON en español del ESP32, validación de saturación y valores extremos, muestreo previsto de 10 s, refresco de 5 s, pérdida de señal a 60 s, historial del observatorio actualizado automáticamente sin interrumpir la reproducción y diagnóstico de red. Se conserva el diseño, el esquema SQLite, los endpoints de consulta y el firmware existente. La guía vigente es [CONECTAR_PROTOTIPO.md](CONECTAR_PROTOTIPO.md).
 
+## Publicación en internet con dirección fija
+
+`publicar.ps1` activa Tailscale Funnel y guarda `public_url`. `run_server.py` abre además `127.0.0.1:5080` (`public_port`), de solo lectura: solo acepta `POST /api/lecturas` si hay `node_key`. Respuestas comprimidas con gzip. `/acceso` explica «cualquier red» cuando la URL es pública. Sin cambios en SQLite, el contrato del ESP32 ni el puerto 5000. Guía: [PUBLICAR_INTERNET.md](PUBLICAR_INTERNET.md).
+
 ## QR con la IP actual del hotspot
 
 `/acceso` y `/acceso/qr.svg` ya no dependen de una `public_url` escrita a mano: usan la IPv4 con la que el PC sale a la red (hotspot), incluso si la página se abre desde `127.0.0.1`. Una `public_url` con una IP que el PC ya no tiene se ignora; un nombre de dominio se respeta. `run_server.py` imprime al arrancar la URL para celulares, el `SERVER_URL` del ESP32 y la del QR. Sin cambios en el `POST /api/lecturas`, SQLite ni el firmware.

@@ -223,5 +223,70 @@ class NarrativeTests(unittest.TestCase):
         self.assertRegex(self.story(rows, "7d")[0]["body"], r"17 nov, 08:00")
 
 
+class PublicationTests(unittest.TestCase):
+    """Puerto público (túnel): solo lectura, compresión y hoja de acceso fija."""
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix="econodo-public-")
+        self.env = patch.dict(os.environ, {"ECONODO_DEMO": "0", "ECONODO_DATA_DIR": self.temp.name})
+        self.env.start()
+        from app import create_app, public_readonly
+        self.create_app, self.public_readonly = create_app, public_readonly
+
+    def tearDown(self):
+        self.env.stop()
+        self.temp.cleanup()
+
+    def public_client(self, **config):
+        from werkzeug.test import Client
+        app = self.create_app({"node_key": "", **config})
+        return app, Client(self.public_readonly(app, app.config["ECONODO_SETTINGS"]))
+
+    def test_public_port_is_read_only_without_key(self):
+        app, client = self.public_client()
+        reading = {"nodo": "econodo-01", "temperatura": 21, "humedad": 60, "lux": 100}
+        self.assertEqual(client.post("/api/lecturas", json=reading).status_code, 403)
+        self.assertEqual(client.get("/api/estado").json["total_readings"], 0)
+        self.assertEqual(client.get("/").status_code, 200)
+        # El puerto local sigue aceptando al ESP32 como antes.
+        self.assertEqual(app.test_client().post("/api/lecturas", json=reading).status_code, 201)
+
+    def test_public_port_accepts_node_only_with_key(self):
+        _, client = self.public_client(node_key="clave-larga")
+        reading = {"nodo": "econodo-01", "temperatura": 21, "humedad": 60, "lux": 100}
+        self.assertEqual(client.post("/api/lecturas", json=reading).status_code, 401)
+        ok = client.post("/api/lecturas", json=reading, headers={"X-EcoNodo-Key": "clave-larga"})
+        self.assertEqual(ok.status_code, 201)
+        self.assertEqual(client.delete("/api/lecturas").status_code, 403)
+
+    def test_large_json_is_gzipped_only_when_accepted(self):
+        import gzip
+        app = self.create_app({"node_key": ""})
+        client = app.test_client()
+        for _ in range(40):
+            client.post("/api/lecturas", json={"nodo": "n1", "temperatura": 21, "humedad": 60, "lux": 100})
+        plain = client.get("/api/historial?periodo=hoy")
+        self.assertNotIn("Content-Encoding", plain.headers)
+        packed = client.get("/api/historial?periodo=hoy", headers={"Accept-Encoding": "gzip, br"})
+        self.assertEqual(packed.headers["Content-Encoding"], "gzip")
+        self.assertEqual(gzip.decompress(packed.data), plain.data)
+        script = client.get("/static/vendor/chart.umd.js", headers={"Accept-Encoding": "gzip"})
+        self.assertEqual(script.headers["Content-Encoding"], "gzip")
+        self.assertLess(len(script.data), 120_000)
+
+    def test_access_page_with_fixed_public_url(self):
+        app = self.create_app({"node_key": "", "public_url": "https://econodo.ejemplo.ts.net"})
+        html = app.test_client().get("/acceso").get_data(as_text=True)
+        self.assertIn("https://econodo.ejemplo.ts.net", html)
+        self.assertIn("cualquier red", html)
+        self.assertNotIn("misma red Wi-Fi", html)
+
+    def test_is_public_url(self):
+        from app import is_public_url
+        self.assertTrue(is_public_url("https://econodo.ejemplo.ts.net"))
+        self.assertFalse(is_public_url("http://10.218.192.22:5000"))
+        self.assertFalse(is_public_url("http://127.0.0.1:5000"))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

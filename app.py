@@ -34,6 +34,8 @@ def load_settings() -> dict:
         "reading_interval_seconds": 10,
         "refresh_interval_seconds": 5,
         "gap_after_seconds": 60,
+        # Puerto solo en este PC (127.0.0.1) para el túnel público; 0 lo desactiva.
+        "public_port": 5080,
     }
     paths = [ROOT / "config.json", Path(os.environ.get("ECONODO_CONFIG", ROOT / "config.local.json"))]
     for path in paths:
@@ -112,6 +114,47 @@ def resolve_public_url(settings: dict, host_url: str) -> str:
     return request_url
 
 
+def is_public_url(url: str) -> bool:
+    """True si la URL es una dirección de internet (no la red local del hotspot)."""
+    import ipaddress
+    from urllib.parse import urlsplit
+
+    host = urlsplit(url).hostname or ""
+    if host in LOOPBACK_HOSTS or host.endswith(".local"):
+        return False
+    try:
+        return ipaddress.ip_address(host).is_global
+    except ValueError:
+        return True
+
+
+def public_readonly(wsgi_app, settings: dict):
+    """Envoltorio para el puerto que se publica en internet.
+
+    Los visitantes solo pueden leer. El POST de lecturas solo se acepta por aquí
+    si hay `node_key` configurada (la propia ruta comprueba la clave); sin clave,
+    nadie de internet puede escribir en la base.
+    """
+    import json
+
+    def application(environ, start_response):
+        method = environ.get("REQUEST_METHOD", "GET").upper()
+        path = environ.get("PATH_INFO", "")
+        allowed = method in {"GET", "HEAD"} or (
+            method == "POST" and path == "/api/lecturas" and str(settings.get("node_key", "")).strip())
+        if allowed:
+            return wsgi_app(environ, start_response)
+        body = json.dumps({"error": "La dirección pública es de solo lectura."}).encode("utf-8")
+        start_response("403 Forbidden", [("Content-Type", "application/json"), ("Content-Length", str(len(body)))])
+        return [body]
+
+    return application
+
+
+COMPRESSIBLE = {"application/json", "text/html", "text/csv", "text/css", "text/javascript",
+                "application/javascript", "image/svg+xml"}
+
+
 def create_app(test_config: dict | None = None) -> Flask:
     app = Flask(__name__)
     settings = load_settings()
@@ -128,6 +171,30 @@ def create_app(test_config: dict | None = None) -> Flask:
         # Evita mezclar una plantilla antigua con JavaScript recién actualizado.
         if response.mimetype == "text/html":
             response.headers["Cache-Control"] = "no-store"
+        return response
+
+    @app.after_request
+    def compress(response):
+        # El historial de un día (~8.640 lecturas) pesa más de 1 MB en JSON y se
+        # consulta cada pocos segundos. Comprimido baja ~10 veces: importa para
+        # visitantes con datos móviles y para la subida del hotspot.
+        import gzip
+
+        if (response.status_code != 200 or response.mimetype not in COMPRESSIBLE
+                or "Content-Encoding" in response.headers
+                or "gzip" not in request.headers.get("Accept-Encoding", "").lower()):
+            return response
+        source = response.response
+        response.direct_passthrough = False
+        data = response.get_data()
+        if hasattr(source, "close"):
+            source.close()  # archivo estático ya leído en memoria
+        if len(data) < 1024:
+            return response
+        response.set_data(gzip.compress(data, compresslevel=5))
+        response.headers["Content-Encoding"] = "gzip"
+        response.headers.add("Vary", "Accept-Encoding")
+        response.headers.pop("ETag", None)  # la ETag del archivo ya no describe estos bytes
         return response
 
     def local_timezone():
@@ -189,7 +256,8 @@ def create_app(test_config: dict | None = None) -> Flask:
         public_url = resolve_public_url(settings, request.host_url)
         host = urlsplit(public_url).hostname or ""
         local_only = host in LOOPBACK_HOSTS
-        return render_template("access.html", settings=settings, public_url=public_url, local_only=local_only)
+        return render_template("access.html", settings=settings, public_url=public_url, local_only=local_only,
+                               is_public=is_public_url(public_url))
 
     @app.get("/acceso/qr.svg")
     def access_qr():

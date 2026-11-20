@@ -40,7 +40,7 @@
         <span class="eyebrow">Dirección del diario</span>
         <p class="access-url">{{ public_url }}</p>
         <p class="access-note">El código abre esta dirección. No contiene la contraseña de la red Wi-Fi, y solo funciona para quien esté en la misma red que el servidor.</p>
-        {% if local_only %}<div class="access-warning" role="note"><strong>Esta dirección solo sirve en este computador.</strong> Antes de imprimir el QR, configura <code>public_url</code> con la IP fija del servidor y abre EcoNodo desde un segundo dispositivo.</div>{% else %}<div class="access-tip" role="note">Comprueba el acceso desde un segundo dispositivo antes de imprimir o pegar el QR en la carcasa.</div>{% endif %}
+        {% if local_only %}<div class="access-warning" role="note"><strong>Esta dirección solo sirve en este computador.</strong> No se encontró una red local: conecta este PC al hotspot, recarga esta página y abre EcoNodo desde un segundo dispositivo antes de imprimir el QR.</div>{% else %}<div class="access-tip" role="note">Comprueba el acceso desde un segundo dispositivo antes de imprimir o pegar el QR en la carcasa.</div>{% endif %}
       </div>
     </section>
   </main>

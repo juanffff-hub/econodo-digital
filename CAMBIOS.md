@@ -4,6 +4,10 @@
 
 Actualización posterior al rediseño descrito abajo: recepción del JSON en español del ESP32, validación de saturación y valores extremos, muestreo previsto de 10 s, refresco de 5 s, pérdida de señal a 60 s, historial del observatorio actualizado automáticamente sin interrumpir la reproducción y diagnóstico de red. Se conserva el diseño, el esquema SQLite, los endpoints de consulta y el firmware existente. La guía vigente es [CONECTAR_PROTOTIPO.md](CONECTAR_PROTOTIPO.md).
 
+## QR con la IP actual del hotspot
+
+`/acceso` y `/acceso/qr.svg` ya no dependen de una `public_url` escrita a mano: usan la IPv4 con la que el PC sale a la red (hotspot), incluso si la página se abre desde `127.0.0.1`. Una `public_url` con una IP que el PC ya no tiene se ignora; un nombre de dominio se respeta. `run_server.py` imprime al arrancar la URL para celulares, el `SERVER_URL` del ESP32 y la del QR. Sin cambios en el `POST /api/lecturas`, SQLite ni el firmware.
+
 ## Rediseño original
 
 Rediseño visual y narrativo de EcoNodo Digital sobre el proyecto existente. **No cambia** el firmware, el esquema SQLite, `config.json`, `app.py`, `econodo/storage.py`, las herramientas (`tools/`), los scripts de arranque ni el contrato de `POST /api/lecturas` (`node_id`, `temperature_c`, `humidity_pct`, `illuminance_lux`; rangos −40…80, 0…100, 0…65535; respuestas 201/400/401). `data/` y `demo_data/` siguen separadas y no se insertó ningún dato ficticio en la base real.

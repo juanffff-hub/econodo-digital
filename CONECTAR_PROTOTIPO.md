@@ -98,11 +98,20 @@ El teléfono que comparte el hotspot puede comportarse distinto de otro teléfon
 
 ## 5. Logo, QR y cierre de la carcasa
 
-Primero probar la página desde el segundo celular. Después abrir **http://10.218.192.22:5000/acceso** y usar **Imprimir esta página**. Esa vista genera el QR para la dirección de red; no imprimir el QR abierto desde `127.0.0.1`.
+Primero probar la página desde el segundo celular. Después abrir **http://10.218.192.22:5000/acceso** y usar **Imprimir esta página**. Esa vista genera el QR con la IPv4 **actual** del computador en el hotspot, aunque se abra desde `127.0.0.1`: si el hotspot cambia la IP, basta recargar `/acceso` (el servidor también imprime al arrancar la dirección para celulares). Un QR ya **impreso** conserva la IP con la que se generó; si la IP cambia, hay que reimprimirlo y actualizar `SERVER_URL` del ESP32. Una `public_url` fija en `config.local.json` solo se usa si este PC todavía tiene esa IP.
 
 El QR **no conecta al Wi-Fi** ni contiene su contraseña: indicar al visitante cómo unirse al hotspot antes de escanear. No sustituye una página pública en internet.
 
 Mantener el margen blanco del QR, contraste oscuro sobre blanco y tamaño legible (idealmente al menos 35 mm de lado), y ensayar la lectura con la etiqueta a su tamaño final antes de pegarla. No cubrir la ventana del BH1750, la ventilación del DHT22 ni el LED.
+
+## Día de la presentación (decisión vigente)
+
+La IPv4 que el hotspot da al PC puede cambiar al reactivarlo, y con ella fallarían un QR impreso de la página y el `SERVER_URL` del ESP32. Por eso:
+
+- **Solo se imprime el QR del Wi-Fi del hotspot** (no cambia mientras no cambien nombre y clave). El QR de la página **no se imprime**: se muestra en vivo en `/acceso`, que siempre usa la IP actual.
+- Orden: encender hotspot → conectar el PC → ejecutar `iniciar.ps1` (detiene un servidor EcoNodo anterior si ocupa el puerto) → leer en su terminal la URL de celulares y el `SERVER_URL`.
+- Si la IP coincide con la del sketch, no se toca nada. Si cambió: actualizar `SERVER_URL` en Arduino IDE, subir el sketch y comprobar **HTTP 201** / un destello del LED.
+- Abrir `/acceso` en el PC y probar el QR con un celular conectado al hotspot.
 
 ## Protección de las mediciones
 

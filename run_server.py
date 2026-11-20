@@ -2,7 +2,7 @@
 
 from waitress import create_server
 
-from app import app
+from app import app, detect_lan_ip
 
 
 if __name__ == "__main__":
@@ -16,7 +16,13 @@ if __name__ == "__main__":
                              "en su terminal o cambia 'port' en config.local.json.") from error
         raise
     print(f"EcoNodo disponible en http://127.0.0.1:{port}", flush=True)
-    print("Para otros dispositivos, usa la IP local del servidor y la misma red Wi-Fi.", flush=True)
+    lan = detect_lan_ip()
+    if lan:
+        print(f"Celulares (mismo hotspot): http://{lan}:{port}", flush=True)
+        print(f"ESP32 SERVER_URL:          http://{lan}:{port}/api/lecturas", flush=True)
+        print(f"QR para imprimir:          http://{lan}:{port}/acceso", flush=True)
+    else:
+        print("Para otros dispositivos, conecta este PC al hotspot y usa su IP local.", flush=True)
     print("Modo:", "DEMOSTRACIÓN" if app.config["ECONODO_DEMO"] else "REAL", flush=True)
     print(f"Muestreo previsto: {settings['reading_interval_seconds']} s | Página: cada {settings['refresh_interval_seconds']} s", flush=True)
     print("En otra terminal, ejecuta comprobar_conexion.ps1 para ver las direcciones del ESP32, celulares y QR.", flush=True)

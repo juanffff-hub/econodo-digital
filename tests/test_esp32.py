@@ -127,7 +127,26 @@ class PrototypeTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("http://192.168.43.25:5000", recorded)
         self.assertIn("<svg", response.text)
-        self.assertIn("solo sirve en este computador", self.client.get("/acceso", base_url="http://127.0.0.1:5000").text)
+        with patch("app.detect_lan_ip", return_value=None):
+            self.assertIn("solo sirve en este computador", self.client.get("/acceso", base_url="http://127.0.0.1:5000").text)
+
+    def test_qr_follows_current_lan_ip(self):
+        from app import resolve_public_url
+        settings = {"public_url": "", "port": 5000}
+        with patch("app.detect_lan_ip", return_value="10.218.192.22"):
+            # Abierto desde 127.0.0.1: el QR usa la IP actual del hotspot.
+            self.assertEqual(resolve_public_url(settings, "http://127.0.0.1:5000/"), "http://10.218.192.22:5000")
+            html = self.client.get("/acceso", base_url="http://127.0.0.1:5000").text
+            self.assertIn("http://10.218.192.22:5000", html)
+            self.assertNotIn("solo sirve en este computador", html)
+        # Una IP fija que este PC ya no tiene se descarta en favor de la actual.
+        stale = {"public_url": "http://10.0.0.99:5000", "port": 5000}
+        with patch("app.detect_lan_ip", return_value="192.168.43.25"), \
+             patch("app.local_ipv4_addresses", return_value={"192.168.43.25"}):
+            self.assertEqual(resolve_public_url(stale, "http://127.0.0.1:5000/"), "http://192.168.43.25:5000")
+        # Un nombre de dominio configurado se respeta.
+        named = {"public_url": "http://econodo.local:5000/", "port": 5000}
+        self.assertEqual(resolve_public_url(named, "http://127.0.0.1:5000/"), "http://econodo.local:5000")
 
     def test_real_http_server_receives_and_serves_without_demo(self):
         from waitress import create_server

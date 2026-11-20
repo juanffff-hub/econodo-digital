@@ -44,6 +44,74 @@ def load_settings() -> dict:
     return defaults
 
 
+LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "::1", ""}
+
+
+def detect_lan_ip() -> str | None:
+    """IPv4 de la interfaz con la que este PC sale a la red (p. ej. el hotspot).
+
+    Un socket UDP "conectado" no envía paquetes: solo pide al sistema la ruta.
+    """
+    import ipaddress
+    import socket
+
+    for probe in ("8.8.8.8", "10.255.255.255", "192.168.255.255"):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+                sock.connect((probe, 9))
+                ip = ipaddress.ip_address(sock.getsockname()[0])
+        except OSError:
+            continue
+        if ip.is_private and not ip.is_loopback and not ip.is_link_local:
+            return str(ip)
+    return None
+
+
+def local_ipv4_addresses() -> set[str]:
+    import socket
+
+    found = set()
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            found.add(info[4][0])
+    except OSError:
+        pass
+    lan = detect_lan_ip()
+    if lan:
+        found.add(lan)
+    return found
+
+
+def resolve_public_url(settings: dict, host_url: str) -> str:
+    """Dirección que abre EcoNodo desde otro dispositivo de la misma red.
+
+    Orden: public_url si sigue siendo válida en este PC → la dirección con la que
+    se abrió la página si no es local → la IPv4 actual detectada → host_url.
+    Así el QR sigue a la IP vigente aunque el hotspot la cambie.
+    """
+    import ipaddress
+    from urllib.parse import urlsplit
+
+    configured = str(settings.get("public_url", "")).strip().rstrip("/")
+    if configured:
+        host = urlsplit(configured).hostname or ""
+        try:
+            ipaddress.ip_address(host)
+            is_ip = True
+        except ValueError:
+            is_ip = False
+        # Un nombre de dominio se respeta; una IP fija solo si este PC aún la tiene.
+        if host not in LOOPBACK_HOSTS and (not is_ip or host in local_ipv4_addresses()):
+            return configured
+    request_url = host_url.rstrip("/")
+    if (urlsplit(request_url).hostname or "") not in LOOPBACK_HOSTS:
+        return request_url
+    lan = detect_lan_ip()
+    if lan:
+        return f"http://{lan}:{int(settings['port'])}"
+    return request_url
+
+
 def create_app(test_config: dict | None = None) -> Flask:
     app = Flask(__name__)
     settings = load_settings()
@@ -118,9 +186,9 @@ def create_app(test_config: dict | None = None) -> Flask:
     def access():
         from urllib.parse import urlsplit
 
-        public_url = str(settings["public_url"]).strip().rstrip("/") or request.host_url.rstrip("/")
+        public_url = resolve_public_url(settings, request.host_url)
         host = urlsplit(public_url).hostname or ""
-        local_only = host in {"localhost", "127.0.0.1", "0.0.0.0"}
+        local_only = host in LOOPBACK_HOSTS
         return render_template("access.html", settings=settings, public_url=public_url, local_only=local_only)
 
     @app.get("/acceso/qr.svg")
@@ -128,8 +196,8 @@ def create_app(test_config: dict | None = None) -> Flask:
         import qrcode
         from qrcode.image.svg import SvgPathImage
 
-        public_url = str(settings["public_url"]).strip().rstrip("/") or request.host_url.rstrip("/")
-        qr = qrcode.QRCode(box_size=8, border=3, error_correction=qrcode.constants.ERROR_CORRECT_M)
+        public_url = resolve_public_url(settings, request.host_url)
+        qr =qrcode.QRCode(box_size=8, border=3, error_correction=qrcode.constants.ERROR_CORRECT_M)
         qr.add_data(public_url)
         qr.make(fit=True)
         buffer = io.BytesIO()

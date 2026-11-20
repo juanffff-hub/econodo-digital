@@ -192,7 +192,7 @@ El firmware de partida está en `firmware/EcoNodo/`. En Arduino IDE, abre `EcoNo
 
 1. Copia `firmware/EcoNodo/config.h` a `config.local.h` en la misma carpeta y reemplaza SSID, contraseña, IP/URL del servidor, `NODE_KEY` y `NODE_ID`. No incluyas `localhost` en `SERVER_URL`: en el ESP32 apuntaría al propio nodo.
 2. Mantén el cableado fijado en el Avance 2: DHT22 datos → GPIO 4 (pull-up de 4,7 kΩ a 3,3 V); BH1750 SDA → GPIO 21, SCL → GPIO 22, dirección I²C 0x23; LED → GPIO 18 con resistencia de 220 Ω. Alimenta el ESP32 por USB 5 V; los sensores a 3,3 V. Comprueba el pinout de **los módulos concretos comprados** antes de energizar.
-3. El nodo envía inmediatamente al iniciar y después cada 300 s. Un destello del LED significa POST aceptado (HTTP 201); dos destellos significan lectura inválida, pérdida de Wi-Fi o fallo de envío. El monitor serie a 115200 baudios muestra el código HTTP.
+3. El nodo envía inmediatamente al iniciar y después cada 10 s. Un destello del LED significa POST aceptado (HTTP 201); dos destellos significan lectura inválida, pérdida de Wi-Fi o fallo de envío. El monitor serie a 115200 baudios muestra el código HTTP.
 4. El servidor pone la fecha y hora al **recibir** cada lectura. El nodo no necesita reloj RTC, sincronización NTP ni almacenamiento de historial.
 5. En la carcasa, separa físicamente el DHT22 del calor del ESP32 y dale ventilación protegida. Sitúa el BH1750 detrás de la ventana transparente sin apuntarlo directamente al sol; el material de esa ventana puede atenuar la luz y debe anotarse al interpretar los lux.
 6. Compara varias lecturas reales en el monitor serie, el dashboard y el CSV. Confirma estabilidad durante una jornada antes de fijar el QR.

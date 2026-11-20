@@ -14,7 +14,8 @@ constexpr uint8_t DHT_PIN = 4;
 constexpr uint8_t LED_PIN = 18;
 constexpr uint8_t SDA_PIN = 21;
 constexpr uint8_t SCL_PIN = 22;
-constexpr unsigned long INTERVAL_MS = 300000UL;
+// El prototipo operativo mide y envía una muestra cada 10 segundos.
+constexpr unsigned long INTERVAL_MS = 10000UL;
 
 DHT dht(DHT_PIN, DHT22);
 BH1750 lightMeter;

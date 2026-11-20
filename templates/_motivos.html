@@ -1,0 +1,47 @@
+{# Motivos gráficos originales de EcoNodo. Dibujo propio, sin especie identificable:
+   representan «una hoja», «una ramita» y «hierba» de forma genérica, no la flora del lugar.
+   Se declaran una vez y se reutilizan con <use>. Nunca contienen datos. #}
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- Hoja: base en (0,0), punta en (0,-104). La nervadura central y las laterales son la «traza» del motivo. -->
+    <g id="h-hoja">
+      <path class="h-cuerpo" d="M0 0C6-10 24-26 22-52C20-76 8-92 0-104C-8-92-20-76-22-52C-24-26-6-10 0 0Z"/>
+      <path class="h-vena" d="M0 2V-96M0-20Q-9-24-16-32M0-36Q-10-42-18-52M0-52Q-9-60-16-70M0-68Q-6-76-11-84M0-20Q9-24 16-32M0-36Q10-42 18-52M0-52Q9-60 16-70M0-68Q6-76 11-84"/>
+    </g>
+    <!-- Ramita: lienzo 200 × 260, base en (100,250). -->
+    <g id="h-ramita">
+      <path class="h-tallo" d="M100 252C96 190 108 130 90 60C84 38 86 20 92 6"/>
+      <use href="#h-hoja" transform="translate(97 218) rotate(-58) scale(.78)"/>
+      <use href="#h-hoja" transform="translate(99 192) rotate(54) scale(.82)"/>
+      <use href="#h-hoja" transform="translate(102 162) rotate(-50) scale(.86)"/>
+      <use href="#h-hoja" transform="translate(100 134) rotate(47) scale(.86)"/>
+      <use href="#h-hoja" transform="translate(96 106) rotate(-42) scale(.8)"/>
+      <use href="#h-hoja" transform="translate(93 78) rotate(38) scale(.72)"/>
+      <use href="#h-hoja" transform="translate(91 54) rotate(-6) scale(.7)"/>
+    </g>
+    <!-- Hierba: lienzo 160 × 110, base en y = 110. -->
+    <g id="h-hierba">
+      <path class="h-cuerpo" d="M8 110C12 70 6 36 18 2C24 40 28 76 26 110Z"/>
+      <path class="h-cuerpo" d="M30 110C30 74 38 48 58 20C58 52 54 84 52 110Z"/>
+      <path class="h-cuerpo" d="M56 110C62 62 72 30 92 6C92 44 82 82 80 110Z"/>
+      <path class="h-cuerpo" d="M84 110C88 78 104 52 130 40C122 64 112 88 108 110Z"/>
+      <path class="h-cuerpo" d="M110 110C116 84 130 66 152 60C146 78 134 96 132 110Z"/>
+    </g>
+    <!-- Marca: brote de dos hojas dentro de un círculo y un nodo en la base (la «señal»). -->
+    <g id="h-marca">
+      <circle cx="24" cy="24" r="22.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M24 37V22M24 29C15 28 12 22 13 13 22 14 25 20 24 29ZM24 25C24 17 29 13 36 12 35 20 31 24 24 25Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="24" cy="39.5" r="1.9" fill="currentColor"/>
+    </g>
+    <!-- Glifos de variable: ilustraciones, no gráficas. Lienzo 32 × 32. -->
+    <g id="g-temp" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 19.5V7a3 3 0 0 1 6 0v12.5a6 6 0 1 1-6 0Z"/><path d="M16 12v12"/><path d="M22.5 8h3M22.5 12h3M22.5 16h3"/>
+    </g>
+    <g id="g-humedad" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 4S7 14 7 20a9 9 0 0 0 18 0C25 14 16 4 16 4Z"/><path d="M16 13v14M16 21l-4-3M16 18l4-3"/>
+    </g>
+    <g id="g-luz" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="16" r="5.2"/><path d="M16 3.5v4M16 24.5v4M3.5 16h4M24.5 16h4M7.2 7.2l2.8 2.8M22 22l2.8 2.8M7.2 24.8 10 22M22 10l2.8-2.8"/>
+    </g>
+  </defs>
+</svg>

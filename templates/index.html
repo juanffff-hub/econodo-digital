@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f2d26">
+  <meta name="description" content="EcoNodo: un herbario de señales de temperatura, humedad y luz de una zona verde, registrado por un nodo local.">
+  <title>EcoNodo · Diario de una zona verde</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script src="{{ url_for('static', filename='vendor/chart.umd.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</head>
+<body class="home" data-timezone="{{ settings.timezone }}" data-reading-interval="{{ settings.reading_interval_seconds }}" data-refresh-interval="{{ settings.refresh_interval_seconds }}" data-gap-seconds="{{ settings.gap_after_seconds }}">
+  {% include '_motivos.html' %}
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <div class="top-note" role="status">{% if demo %}MODO DEMOSTRACIÓN · Lecturas simuladas, separadas de las reales{% else %}OBSERVATORIO AMBIENTAL · Muestreo previsto cada {{ settings.reading_interval_seconds }} segundos{% endif %}</div>
+
+  <header class="site-header shell">
+    <a class="brand" href="#inicio" aria-label="EcoNodo, inicio">
+      <svg class="brand-mark" viewBox="0 0 48 48" width="46" height="46" aria-hidden="true"><use href="#h-marca"/></svg>
+      <span><span class="brand-name">eco<span class="brand-light">nodo</span></span><small>diario ambiental</small></span>
+    </a>
+    <nav class="nav-links" aria-label="Secciones principales">
+      <a href="/experiencia">Experiencia</a><a href="#ahora">Ahora</a><a href="#historia">La historia</a><a href="#datos">Datos</a>
+    </nav>
+    <a class="header-action" href="/acceso">Compartir acceso <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <div class="folio-strip shell" aria-hidden="true">
+    <span>Herbario de señales</span>
+    <span>Hoja 01 · Portada</span>
+    <span class="folio-place">{{ settings.site_name }}</span>
+  </div>
+
+  <main id="contenido">
+    <section id="inicio" class="hero shell">
+      <div class="hero-copy">
+        <p class="eyebrow hero-folio"><b>Hoja 01</b> Un lugar, muchas señales</p>
+        <h1>La zona verde <em>tiene una historia.</em></h1>
+        <p class="hero-lead">EcoNodo escucha su temperatura, humedad y luz. Cada lectura suma una página a un diario que podemos explorar juntos.</p>
+        <div class="hero-actions"><a class="button button-primary" href="/experiencia">Entrar al observatorio vivo <span aria-hidden="true">↘</span></a><a class="text-link" href="#historia">Leer el diario <span aria-hidden="true">→</span></a></div>
+        <p class="hero-pulse" id="hero-pulse" data-state="loading"><span class="status-dot" aria-hidden="true"></span><span id="hero-reading-time">Consultando la última lectura…</span></p>
+        <div class="hero-foot"><span id="hero-location">{{ settings.site_name }}</span><span class="hero-foot-divider" aria-hidden="true"></span><span>Registro local · sin internet para consultar</span></div>
+      </div>
+
+      <div class="hero-art device-scene is-empty" id="device-scene" aria-label="Representación interactiva de la carcasa EcoNodo del Avance 2" aria-describedby="scene-ambient-description">
+        <p id="scene-ambient-description" class="visually-hidden">Ilustración de la carcasa sobre una hoja de herbario. Las luces y las líneas punteadas ilustran el recorrido de los datos; no son piezas del dispositivo ni una predicción meteorológica. Sin lecturas mantienen un ambiente neutro.</p>
+        <!-- Plantas prensadas: decoración de la hoja, sin relación con las mediciones. -->
+        <div class="scene-flora" aria-hidden="true">
+          <svg class="flora flora-a" viewBox="0 0 200 260" width="200" height="260" focusable="false"><use href="#h-ramita"/></svg>
+          <svg class="flora flora-b" viewBox="0 0 200 260" width="200" height="260" focusable="false"><use href="#h-ramita"/></svg>
+          <svg class="flora flora-c" viewBox="0 0 160 110" width="160" height="110" focusable="false"><use href="#h-hierba"/></svg>
+        </div>
+        <div class="scene-header">
+          <span class="scene-title"><b>Ejemplar 01</b> El nodo</span>
+          <div class="scene-header-actions"><button type="button" id="journey-toggle" class="journey-toggle" aria-pressed="false" aria-controls="scene-flow">Recorrer el dato</button><button type="button" id="motion-toggle" class="motion-toggle" aria-pressed="false">Pausar movimiento</button></div>
+        </div>
+        <div class="scene-content">
+          <div class="device-viewport" id="device-viewport" tabindex="0" role="group" aria-label="Carcasa. Mueve el cursor, desliza horizontalmente o usa las flechas para girar. Inicio restablece la vista.">
+            <div class="device-halo" aria-hidden="true"></div>
+            <div class="device-cast-shadow" aria-hidden="true"></div><div class="device-ground-shadow" aria-hidden="true"></div>
+            <!-- Metáforas ambientales, fuera del árbol de piezas de la carcasa. -->
+            <div class="ambient-field" aria-hidden="true">
+              <div class="ambient-rays"></div>
+              <div class="ambient-warmth"><i></i><i></i></div>
+              <div class="ambient-mist"></div>
+              <svg class="ambient-routes" viewBox="0 0 300 400" focusable="false">
+                <path class="route route-dht" d="M22 300C-10 170 55 80 136 194"/>
+                <path class="route route-bh" d="M149 40C270 10 300 78 217 169"/>
+                <path class="route route-esp" d="M234 190C328 181 314 303 230 340"/>
+                <path class="route route-server" d="M48 353C125 395 250 375 296 320"/>
+              </svg>
+            </div>
+            <div class="device-rotator" id="device-rotator">
+              <div class="device-face device-front">
+                <i class="device-screw screw-tl" aria-hidden="true"></i><i class="device-screw screw-tr" aria-hidden="true"></i><i class="device-screw screw-bl" aria-hidden="true"></i><i class="device-screw screw-br" aria-hidden="true"></i>
+                <span class="device-led" id="device-led" aria-hidden="true"></span>
+                <span class="device-logo"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M23 4C10 4 4 10 5 21c10 2 17-4 18-17ZM6 21c4-6 8-9 14-12" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>EcoNodo</span>
+                <a class="device-qr" href="/acceso" aria-label="Abrir la página de acceso del QR"><img src="{{ url_for('access_qr') }}" alt="" width="47" height="47"><span>Acceso</span></a>
+                <button type="button" class="device-hotspot hotspot-led" data-hotspot="led" aria-label="LED: estado de lectura y conexión"><span aria-hidden="true">+</span></button>
+                <button type="button" class="device-hotspot hotspot-esp" data-hotspot="esp" aria-label="ESP32: procesamiento y comunicación, ubicado dentro de la carcasa"><span aria-hidden="true">+</span></button>
+              </div>
+              <div class="device-face device-right"><span class="side-knockout" aria-hidden="true"></span><span class="vent-slots" aria-hidden="true"><i></i><i></i><i></i><i></i></span><button type="button" class="device-hotspot hotspot-dht" data-hotspot="dht" aria-label="DHT22: temperatura y humedad relativa, detrás de la ventilación lateral"><span aria-hidden="true">+</span></button></div>
+              <div class="device-face device-top"><span class="optical-window" aria-hidden="true"><i></i></span><button type="button" class="device-hotspot hotspot-bh" data-hotspot="bh" aria-label="BH1750: iluminancia, debajo de la ventana superior"><span aria-hidden="true">+</span></button></div>
+              <div class="device-face device-bottom"><span class="usb-gland" aria-hidden="true"></span></div>
+            </div>
+            <span class="device-usb-note">Paso USB / PG7 <span aria-hidden="true">↗</span></span>
+          </div>
+          <div class="scene-side">
+            <div class="scene-info" id="scene-info" aria-live="polite"><span class="scene-info-kicker">EXPLORA LOS COMPONENTES</span><h3 id="scene-info-title">Explora la carcasa</h3><p id="scene-info-body">Cada elemento del diseño tiene una función. Selecciona un punto o un nombre para seguir el recorrido de los datos.</p></div>
+            <button type="button" class="server-hotspot" data-hotspot="server" aria-label="Servidor local: almacenamiento, relato y dashboard"><span class="server-icon" aria-hidden="true"><i></i><i></i><i></i></span><span><strong>Servidor local</strong><small>Diario + dashboard</small></span><span class="server-plus" aria-hidden="true">+</span></button>
+            <div class="scene-readings" aria-label="Valores actuales de los sensores"><div><span>Temperatura</span><strong id="scene-temp" class="num">— °C</strong></div><div><span>Humedad</span><strong id="scene-humidity" class="num">— %</strong></div><div><span>Luz</span><strong id="scene-light" class="num">— lux</strong></div><p class="scene-reading-time" id="scene-reading-time">Sin lectura recibida</p></div>
+          </div>
+        </div>
+        <div class="scene-hotspot-list" role="group" aria-label="Explorar componentes"><button type="button" data-hotspot="dht">DHT22</button><button type="button" data-hotspot="bh">BH1750</button><button type="button" data-hotspot="esp">ESP32</button><button type="button" data-hotspot="led">LED</button><button type="button" data-hotspot="server">Servidor</button></div>
+        <div class="scene-flow" id="scene-flow" role="group" aria-label="Recorrido de una lectura desde los sensores hasta la experiencia web">
+          <button type="button" class="flow-step" data-flow-step="0" aria-label="Paso 1: los sensores observan el ambiente"><span>01</span>Sensores</button><i aria-hidden="true"></i>
+          <button type="button" class="flow-step" data-flow-step="1" aria-label="Paso 2: el ESP32 reúne la lectura"><span>02</span>ESP32</button><i aria-hidden="true"></i>
+          <button type="button" class="flow-step" data-flow-step="2" aria-label="Paso 3: la lectura viaja por Wi-Fi"><span>03</span>Wi-Fi</button><i aria-hidden="true"></i>
+          <button type="button" class="flow-step" data-flow-step="3" aria-label="Paso 4: el servidor fecha y guarda la lectura"><span>04</span>Servidor</button><i aria-hidden="true"></i>
+          <button type="button" class="flow-step" data-flow-step="4" aria-label="Paso 5: el dato se convierte en diario y gráficas"><span>05</span>Relato</button>
+        </div>
+        <div class="scene-footer">
+          <p class="scene-status" id="scene-status" role="status">Esperando la primera lectura.</p>
+          <div class="scene-bridge"><span>Del entorno al relato</span><a href="#historia">Diario ↗</a><a href="#datos">Gráficas ↗</a></div>
+        </div>
+        <p class="scene-caption">Ilustración basada en el diseño del Avance 2. No es una fotografía del montaje; el hardware aún debe validarse con la instalación real.</p>
+      </div>
+      <!-- Se inicia al terminar su HTML, antes de Chart.js, app.js o cualquier fetch. -->
+      <script src="{{ url_for('static', filename='js/carcasa.js') }}"></script>
+    </section>
+
+    <section id="ahora" class="current-section section-pad">
+      <div class="shell">
+        <div class="section-heading current-heading">
+          <div><p class="eyebrow"><b>Folio 02</b> El presente</p><h2>Así se siente <em>ahora</em></h2><p class="section-lead">Las últimas condiciones observadas en el nodo, con el momento en que el servidor las recibió.</p></div>
+          <div id="connection-pill" class="connection-pill is-loading" role="status"><span class="status-dot"></span><span id="connection-text">Consultando lecturas…</span></div>
+        </div>
+        <div id="data-message" class="data-message" role="status" hidden></div>
+        <div class="metric-grid" id="metric-grid" data-freshness="loading">
+          <article class="metric-card metric-temp">
+            <header class="metric-top"><svg class="metric-glyph" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><use href="#g-temp"/></svg><h3 class="metric-label">Temperatura</h3><span class="metric-index">Aire</span></header>
+            <p class="metric-value"><span id="temperature-now" class="num">—</span><span class="unit">°C</span></p>
+            <p class="metric-meaning" id="temperature-note">Esperando la primera lectura</p>
+            <div class="gauge" id="temperature-gauge" aria-hidden="true" hidden><i></i></div>
+            <p class="gauge-scale" aria-hidden="true"><span>−40</span><span>escala del sensor</span><span>80 °C</span></p>
+            <p class="metric-stamp" id="temperature-stamp">Sin lectura</p>
+          </article>
+          <article class="metric-card metric-humidity">
+            <header class="metric-top"><svg class="metric-glyph" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><use href="#g-humedad"/></svg><h3 class="metric-label">Humedad relativa</h3><span class="metric-index">Aire</span></header>
+            <p class="metric-value"><span id="humidity-now" class="num">—</span><span class="unit">%</span></p>
+            <p class="metric-meaning" id="humidity-note">Esperando la primera lectura</p>
+            <div class="gauge" id="humidity-gauge" aria-hidden="true" hidden><i></i></div>
+            <p class="gauge-scale" aria-hidden="true"><span>0</span><span>escala del sensor</span><span>100 %</span></p>
+            <p class="metric-stamp" id="humidity-stamp">Sin lectura</p>
+          </article>
+          <article class="metric-card metric-light">
+            <header class="metric-top"><svg class="metric-glyph" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><use href="#g-luz"/></svg><h3 class="metric-label">Iluminancia</h3><span class="metric-index">Luz</span></header>
+            <p class="metric-value"><span id="light-now" class="num">—</span><span class="unit">lx</span></p>
+            <p class="metric-meaning" id="light-note">Esperando la primera lectura</p>
+            <div class="gauge" id="light-gauge" aria-hidden="true" hidden><i></i></div>
+            <p class="gauge-scale" aria-hidden="true"><span>0</span><span>escala logarítmica</span><span>65.535 lx</span></p>
+            <p class="metric-stamp" id="light-stamp">Sin lectura</p>
+          </article>
+        </div>
+        <p class="reading-time" id="reading-time">La hora la asigna el servidor cuando recibe cada lectura.</p>
+      </div>
+    </section>
+
+    <section id="historia" class="story-section section-pad">
+      <div class="shell">
+        <div class="section-heading story-heading">
+          <div><p class="eyebrow"><b>Folio 03</b> El relato</p><h2>Un diario hecho <em>de señales</em></h2><p class="section-lead">Los capítulos se escriben a partir de datos registrados y cambian con cada nueva lectura. Cada uno indica en qué se apoya.</p></div>
+          <svg class="flora story-flora" viewBox="0 0 200 260" width="200" height="260" aria-hidden="true" focusable="false"><use href="#h-ramita"/></svg>
+        </div>
+        <div id="story-grid" class="story-grid" aria-live="polite" data-count="0"><p class="loading-copy">Abriendo el diario…</p></div>
+        <p id="story-update-note" class="loading-copy" role="status" hidden></p>
+        <div class="story-note"><svg viewBox="-26 -108 52 112" width="22" height="24" aria-hidden="true"><use href="#h-hoja"/></svg><p>Este relato describe observaciones. No diagnostica la salud ecológica del lugar ni atribuye causas que los sensores no miden.</p></div>
+      </div>
+    </section>
+
+    <section id="datos" class="data-section section-pad on-night">
+      <div class="shell">
+        <div class="section-heading data-heading">
+          <div><p class="eyebrow"><b>Folio 04</b> Mirar más de cerca</p><h2>El tiempo deja <em>pistas</em></h2><p class="section-lead">Compara las tres variables en el mismo periodo y descubre sus cambios.</p></div>
+          <div class="period-control" role="group" aria-label="Periodo del historial"><button type="button" data-period="1h">1 hora</button><button type="button" data-period="6h">6 horas</button><button type="button" data-period="hoy" class="active" aria-pressed="true">Hoy</button><button type="button" data-period="24h">24 horas</button><button type="button" data-period="7d">7 días</button></div>
+        </div>
+        <p id="period-context" class="period-context" role="status">Mostrando las lecturas de hoy.</p>
+        <p id="gap-note" class="gap-note" hidden></p>
+        <article class="rhythm-card" aria-labelledby="rhythm-title">
+          <div class="rhythm-head">
+            <div><span class="chart-kicker">Ritmo del periodo</span><h3 id="rhythm-title">Las señales, de un vistazo</h3><p id="rhythm-description">Cada trazo resume un tramo de tiempo observado. Su altura sigue la luz; su color mezcla temperatura y humedad. <strong>Cada periodo usa su propia escala</strong>: sirve para ver la forma del día, no para comparar un periodo con otro.</p></div>
+            <ul class="rhythm-legend" aria-hidden="true"><li><i class="legend-light"></i>Altura · luz</li><li><i class="legend-temp"></i>Arcilla · temperatura</li><li><i class="legend-humidity"></i>Verde azulado · humedad</li></ul>
+          </div>
+          <div id="rhythm-track" class="rhythm-track is-empty" role="img" aria-label="Ritmo ambiental todavía sin lecturas"><p>Las próximas lecturas dibujarán el ritmo del lugar.</p></div>
+          <div class="rhythm-axis" aria-hidden="true"><span id="rhythm-start">—</span><span id="rhythm-highlight">Esperando señales</span><span id="rhythm-end">—</span></div>
+          <p id="rhythm-scale" class="rhythm-scale" aria-hidden="true"></p>
+          <p id="rhythm-summary" class="visually-hidden">Aún no hay lecturas para resumir.</p>
+        </article>
+        <div class="chart-grid">
+          <article class="chart-card chart-main chart-temp"><div class="chart-head"><div><span class="chart-kicker">01 · Temperatura</span><h3>El aire a lo largo del tiempo</h3></div><span class="chart-unit">°C</span></div><div class="chart-wrap"><canvas id="temperature-chart" role="img" aria-label="Gráfica de temperatura por hora"></canvas></div><p id="temperature-chart-empty" class="chart-empty" hidden>Las próximas lecturas dibujarán esta curva.</p></article>
+          <article class="chart-card chart-humidity"><div class="chart-head"><div><span class="chart-kicker">02 · Humedad relativa</span><h3>La humedad del aire</h3></div><span class="chart-unit">%</span></div><div class="chart-wrap"><canvas id="humidity-chart" role="img" aria-label="Gráfica de humedad relativa por hora"></canvas></div><p id="humidity-chart-empty" class="chart-empty" hidden>Las próximas lecturas dibujarán esta curva.</p></article>
+          <article class="chart-card chart-light"><div class="chart-head"><div><span class="chart-kicker">03 · Iluminancia</span><h3>La luz que llega</h3></div><span class="chart-unit">lx</span></div><div class="chart-wrap"><canvas id="light-chart" role="img" aria-label="Gráfica de iluminancia por hora"></canvas></div><p id="light-chart-empty" class="chart-empty" hidden>Las próximas lecturas dibujarán esta curva.</p></article>
+        </div>
+        <div class="summary-panel"><div class="summary-intro"><span class="eyebrow">En este periodo</span><h3>Un vistazo al conjunto</h3><p id="summary-count">Sin lecturas todavía</p></div><div id="summary-stats" class="summary-stats"></div></div>
+      </div>
+    </section>
+
+    <section class="record-section section-pad">
+      <div class="shell">
+        <div class="section-heading record-heading">
+          <div><p class="eyebrow"><b>Folio 05</b> El registro</p><h2>Detrás de <em>cada capítulo</em></h2><p class="section-lead">Consulta las lecturas recientes o llévate el historial en CSV.</p></div>
+          <a id="csv-link" class="button button-outline" href="/api/exportacion.csv?periodo=hoy" download>Descargar CSV <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Lecturas recientes del periodo, con desplazamiento horizontal si hace falta"><table><caption class="visually-hidden">Las ocho lecturas más recientes del periodo seleccionado</caption><thead><tr><th scope="col">Momento</th><th scope="col" class="col-num">Temperatura</th><th scope="col" class="col-num">Humedad</th><th scope="col" class="col-num">Luz</th></tr></thead><tbody id="recent-rows"><tr><td colspan="4">Cargando lecturas…</td></tr></tbody></table></div>
+        <p class="table-note">Las horas corresponden a {{ settings.timezone }}. Cada fila conserva la hora de recepción del servidor.</p>
+      </div>
+    </section>
+
+    <section id="como-leer" class="learn-section section-pad">
+      <div class="shell learn-layout">
+        <div class="learn-intro"><p class="eyebrow"><b>Folio 06</b> Una pausa para entender</p><h2>Mirar también es <em>hacer preguntas.</em></h2><p class="section-lead">Los números abren la conversación. El contexto de la zona verde la completa.</p><a class="text-link" href="#inicio">Volver al inicio ↑</a></div>
+        <div class="learn-list">
+          <article><svg class="metric-glyph glyph-temp" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><use href="#g-temp"/></svg><div><h3>Temperatura</h3><p>Muestra qué tan cálido está el aire alrededor del sensor. La ubicación y la ventilación influyen en la lectura.</p></div></article>
+          <article><svg class="metric-glyph glyph-humidity" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><use href="#g-humedad"/></svg><div><h3>Humedad relativa</h3><p>Indica la proporción de vapor de agua en el aire con respecto a lo que podría contener a esa temperatura.</p></div></article>
+          <article><svg class="metric-glyph glyph-light" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><use href="#g-luz"/></svg><div><h3>Iluminancia</h3><p>Mide la luz que llega al sensor en lux. Depende de la hora, de hacia dónde mira el sensor y de lo que haya entre él y el cielo; el nodo no distingue cuál de esas cosas ocurrió.</p></div></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer on-night">
+    <div class="shell footer-layout">
+      <div><a class="footer-brand" href="#inicio">eco<span>nodo</span><small>diario ambiental</small></a><p>Una mirada cercana a nuestro entorno compartido.</p></div>
+      <div class="footer-links"><a href="/experiencia">Abrir observatorio vivo ↗</a><a href="/acceso">Acceso desde otros dispositivos ↗</a><a href="/api/exportacion.csv?periodo=hoy">Descargar datos ↗</a><span>Proyecto universitario de computación física · Software libre</span><span>Ilustraciones originales y genéricas: no representan especies del lugar. El montaje físico aún requiere validación.</span></div>
+    </div>
+  </footer>
+</body>
+</html>

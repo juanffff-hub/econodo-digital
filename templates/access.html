@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4efe2">
+  <title>Acceso · EcoNodo</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="access-page" data-timezone="{{ settings.timezone }}">
+  {% include '_motivos.html' %}
+  <a class="skip-link" href="#acceso">Saltar al contenido</a>
+  <header class="site-header shell">
+    <a class="brand" href="/" aria-label="EcoNodo, volver al diario">
+      <svg class="brand-mark" viewBox="0 0 48 48" width="46" height="46" aria-hidden="true"><use href="#h-marca"/></svg>
+      <span><span class="brand-name">eco<span class="brand-light">nodo</span></span><small>diario ambiental</small></span>
+    </a>
+    <a class="header-action" href="/">Volver al diario <span aria-hidden="true">←</span></a>
+  </header>
+
+  <main id="acceso" class="access-main shell">
+    <div class="access-intro">
+      <p class="eyebrow"><b>Hoja de acceso</b> Acceso local</p>
+      <h1>La historia se <em>comparte cerca.</em></h1>
+      <p class="access-lead">Conecta tu celular o computador a la <strong>misma red Wi-Fi</strong> del servidor y abre esta dirección.</p>
+      <ol class="access-steps">
+        <li><b class="num" aria-hidden="true">01</b><span>Únete a la misma red Wi-Fi del servidor.</span></li>
+        <li><b class="num" aria-hidden="true">02</b><span>Escanea el QR o escribe la dirección.</span></li>
+        <li><b class="num" aria-hidden="true">03</b><span>Explora el diario y sus gráficas.</span></li>
+      </ol>
+      <button class="button button-primary print-button" type="button" onclick="window.print()">Imprimir esta página <span aria-hidden="true">↗</span></button>
+      <svg class="flora access-flora" viewBox="0 0 200 260" width="200" height="260" aria-hidden="true" focusable="false"><use href="#h-ramita"/></svg>
+    </div>
+
+    <section class="access-card" aria-label="Código QR y dirección">
+      <div class="qr-frame"><img src="{{ url_for('access_qr') }}" alt="Código QR para abrir EcoNodo en esta red: {{ public_url }}" width="240" height="240"></div>
+      <div class="access-detail">
+        <span class="eyebrow">Dirección del diario</span>
+        <p class="access-url">{{ public_url }}</p>
+        <p class="access-note">El código abre esta dirección. No contiene la contraseña de la red Wi-Fi, y solo funciona para quien esté en la misma red que el servidor.</p>
+        {% if local_only %}<div class="access-warning" role="note"><strong>Esta dirección solo sirve en este computador.</strong> Antes de imprimir el QR, configura <code>public_url</code> con la IP fija del servidor y abre EcoNodo desde un segundo dispositivo.</div>{% else %}<div class="access-tip" role="note">Comprueba el acceso desde un segundo dispositivo antes de imprimir o pegar el QR en la carcasa.</div>{% endif %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>

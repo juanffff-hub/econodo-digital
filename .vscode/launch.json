@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "EcoNodo · datos reales",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/run_server.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": { "ECONODO_DEMO": "0" }
+    },
+    {
+      "name": "EcoNodo · demostración",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/run_server.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": { "ECONODO_DEMO": "1" }
+    }
+  ]
+}

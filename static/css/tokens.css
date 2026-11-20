@@ -1,0 +1,178 @@
+/* EcoNodo · «Herbario de señales»
+   Tokens y base compartidos por /, /experiencia y /acceso.
+   Una sola fuente de verdad para color, tipografía, espaciado y movimiento.
+   Documentación: SISTEMA_VISUAL.md */
+
+/* Colores animables del observatorio (la escena los interpola con suavidad). */
+@property --sky-top { syntax: '<color>'; inherits: true; initial-value: #5f7f78; }
+@property --sky-bottom { syntax: '<color>'; inherits: true; initial-value: #b9b88f; }
+@property --sun-color { syntax: '<color>'; inherits: true; initial-value: #f4da97; }
+
+:root {
+  /* Papel: la base cálida de todo el sitio. */
+  --paper: #f4efe2;
+  --paper-2: #ebe4d1;
+  --paper-3: #ddd4bb;
+  --card: #fbf8ef;
+
+  /* Tinta: verde profundo para texto y estructura. */
+  --ink: #10332a;
+  --ink-2: #1d4a3d;
+  --ink-soft: #4b6358;
+  --line: rgba(16, 51, 42, .16);
+  --line-strong: rgba(16, 51, 42, .34);
+
+  /* Noche: superficies oscuras (sección de datos, observatorio, pie). */
+  --night: #0f2d26;
+  --night-2: #163f35;
+  --on-night: #eef2dc;
+  --on-night-soft: #b9cdb9;
+  --line-night: rgba(238, 242, 220, .2);
+
+  /* Musgo: vegetación y observación. */
+  --moss: #6b8856;
+  --moss-deep: #4a6a3c;
+  --moss-soft: #cddab6;
+
+  /* Cada variable medida tiene un color propio y estable en tarjetas, gráficas,
+     leyendas y recursos. Ninguno funciona como alarma o calificación. */
+  --c-temp: #b05a36;
+  --c-temp-ink: #8f4524;
+  --c-temp-soft: #ecd3bf;
+  --c-humidity: #3f7f78;
+  --c-humidity-ink: #2b625c;
+  --c-humidity-soft: #cbe0da;
+  --c-light: #a67c0e;
+  --c-light-ink: #755602;
+  --c-light-soft: #f0e0a4;
+
+  --focus: #1f6b55;
+  --focus-night: #f0dfa0;
+
+  /* Tipografía: una serif editorial y una sans legible. Sin descargas. */
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --t-note: .75rem;
+  --t-small: .875rem;
+  --t-body: 1.0625rem;
+  --t-lead: clamp(1.125rem, 1.3vw + .8rem, 1.35rem);
+  --t-h3: clamp(1.35rem, 1vw + 1.05rem, 1.7rem);
+  --t-h2: clamp(2.3rem, 3.4vw + 1rem, 4rem);
+  --t-h1: clamp(3rem, 5.4vw + 1rem, 6rem);
+  --t-figure: clamp(3.4rem, 4vw + 2rem, 5.25rem);
+
+  /* Espaciado sobre una escala de 4 px. */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  --s-6: 32px; --s-7: 48px; --s-8: 72px; --s-9: 112px;
+  --gutter: clamp(16px, 4vw, 48px);
+  --measure: 62ch;
+
+  --radius-leaf: 2px 28px 2px 28px;   /* la «hoja»: esquinas opuestas redondeadas */
+  --radius-leaf-lg: 3px 56px 3px 56px;
+  --radius-pill: 999px;
+
+  --shadow-sheet: 0 1px 0 rgba(255, 255, 255, .6) inset, 0 18px 40px -22px rgba(16, 51, 42, .35), 0 2px 6px rgba(16, 51, 42, .08);
+  --ease: cubic-bezier(.3, .7, .2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image: url("../img/papel.svg");
+  background-size: 240px 240px;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3, h4, p, ul, ol, figure, dl, dd { margin-top: 0; }
+a { color: inherit; text-decoration: none; }
+button, input { font: inherit; color: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+img, svg { max-width: 100%; }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.on-night :focus-visible, .is-night:focus-visible, .experience-page :focus-visible { outline-color: var(--focus-night); }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+.skip-link {
+  position: absolute; left: 12px; top: -80px; z-index: 100;
+  padding: 12px 16px; background: var(--card); color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 8px; font-weight: 700;
+}
+.skip-link:focus { top: 12px; }
+
+.shell { width: min(100% - 2 * var(--gutter), 1200px); margin-inline: auto; }
+
+/* Números de instrumento: cifras lineales y de ancho fijo para que no salten al actualizarse. */
+.num, .figure { font-variant-numeric: lining-nums tabular-nums; font-feature-settings: "lnum" 1, "tnum" 1; }
+
+/* Titulares editoriales. */
+h1, h2, h3 { font-family: var(--serif); font-weight: 400; letter-spacing: -.02em; line-height: 1.08; text-wrap: balance; }
+h1 { font-size: var(--t-h1); letter-spacing: -.035em; line-height: 1.02; }
+h2 { font-size: var(--t-h2); letter-spacing: -.03em; }
+h3 { font-size: var(--t-h3); line-height: 1.15; }
+h1 em, h2 em { font-style: italic; color: var(--moss-deep); }
+p { text-wrap: pretty; }
+
+/* Anotación de cuaderno: mayúsculas con espacio, nunca por debajo de 12 px. */
+.eyebrow {
+  display: flex; align-items: center; gap: var(--s-3);
+  margin: 0 0 var(--s-4);
+  font-size: var(--t-note); font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--moss-deep);
+}
+.eyebrow::before { content: ""; width: 28px; height: 1px; background: currentColor; flex: none; }
+.eyebrow b { color: var(--clay-ink, var(--c-temp-ink)); font-weight: 800; }
+
+/* Marca. */
+.brand { display: inline-flex; align-items: center; gap: var(--s-3); white-space: nowrap; }
+.brand-mark { width: 46px; height: 46px; flex: none; color: var(--ink); }
+.brand-name { display: block; font-size: 1.6rem; line-height: .9; letter-spacing: -.055em; font-weight: 800; }
+.brand-name .brand-light { font-weight: 400; }
+.brand small { display: block; margin-top: 6px; font-size: var(--t-note); letter-spacing: .2em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+
+/* Botones. Objetivo táctil mínimo de 44 px. */
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-4);
+  min-height: 48px; padding: 12px 24px; border-radius: var(--radius-pill);
+  font-size: var(--t-small); font-weight: 700; cursor: pointer; border: 1px solid transparent;
+  transition: transform .2s var(--ease), background-color .2s, border-color .2s, color .2s;
+}
+.button:hover { transform: translateY(-2px); }
+.button-primary { background: var(--ink); color: var(--paper); }
+.button-primary:hover { background: var(--ink-2); }
+.button-outline { background: transparent; border-color: var(--line-strong); color: var(--ink); }
+.button-outline:hover { background: var(--moss-soft); border-color: var(--moss-deep); }
+.text-link { font-size: var(--t-small); font-weight: 700; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 5px; min-height: 44px; display: inline-flex; align-items: center; }
+.text-link:hover { color: var(--moss-deep); }
+
+.status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--moss); flex: none; }
+
+/* Separador editorial: una hoja entre dos líneas. */
+.divider { display: flex; align-items: center; gap: var(--s-4); color: var(--moss-deep); margin: var(--s-7) 0; }
+.divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: var(--line-strong); }
+.divider svg { width: 26px; height: 26px; flex: none; }
+
+/* Motivos botánicos (templates/_motivos.html). El color se asigna desde fuera con variables. */
+.h-cuerpo { fill: var(--leaf-fill, currentColor); fill-opacity: var(--leaf-fill-op, .22); stroke: none; }
+.h-vena, .h-tallo { fill: none; stroke: var(--leaf-vein, currentColor); stroke-width: var(--leaf-stroke, 1.4); stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.h-tallo { stroke-width: calc(var(--leaf-stroke, 1.4) * 1.5); }
+.flora { display: block; overflow: visible; color: var(--moss-deep); pointer-events: none; }
+
+/* Superficies de noche: reasignan los colores de texto. */
+.on-night { color: var(--on-night); }
+.on-night h1 em, .on-night h2 em { color: var(--moss-soft); }
+.on-night .eyebrow { color: var(--moss-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

@@ -1,0 +1,9 @@
+.venv/
+.venv_incompatible_*/
+__pycache__/
+*.py[cod]
+data/
+demo_data/
+config.local.json
+firmware/EcoNodo/config.local.h
+.DS_Store

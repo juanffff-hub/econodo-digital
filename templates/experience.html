@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f2d26">
+  <meta name="description" content="Recorrido por un día de lecturas ambientales de EcoNodo, traducido a un paisaje ilustrado.">
+  <title>Observatorio vivo · EcoNodo</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/experience.css') }}">
+  <script src="{{ url_for('static', filename='js/experience.js') }}" defer></script>
+</head>
+<body class="experience-page" data-timezone="{{ settings.timezone }}" data-refresh-interval="{{ settings.refresh_interval_seconds }}">
+  {% include '_motivos.html' %}
+  <a class="skip-link" href="#experiencia">Saltar a la experiencia</a>
+  <div class="experience-notice">{{ 'MODO DEMOSTRACIÓN · Las escenas usan lecturas simuladas' if demo else 'OBSERVATORIO VIVO · Reproducción de lecturas locales' }}</div>
+
+  <header class="experience-header">
+    <a class="experience-brand" href="/" aria-label="Volver al inicio de EcoNodo">
+      <svg viewBox="0 0 48 48" width="42" height="42" aria-hidden="true"><use href="#h-marca"/></svg>
+      <span><span class="brand-name">eco<span class="brand-light">nodo</span></span><small>observatorio vivo</small></span>
+    </a>
+    <a class="experience-back" href="/">Volver al diario <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main id="experiencia" class="experience-main">
+    <section class="living-stage" id="experience-stage" aria-labelledby="experience-title" aria-describedby="experience-description" data-state="loading">
+      <!-- Capas de ambiente: se mueven con la lectura, nunca con el texto. -->
+      <div class="scene-art" aria-hidden="true">
+        <div class="living-sky">
+          <div class="living-stars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="living-sun"><span></span></div>
+          <div class="living-rays"></div>
+          <div class="living-mist mist-one"></div><div class="living-mist mist-two"></div>
+        </div>
+        <div class="landscape">
+          <svg class="landscape-svg" viewBox="0 0 1600 600" width="1600" height="600" preserveAspectRatio="xMidYMax slice" focusable="false">
+            <path class="hill hill-far" d="M0 300C160 240 260 280 400 220C560 150 700 250 860 200C1020 150 1160 240 1320 190C1440 155 1520 200 1600 170V600H0Z"/>
+            <g class="treeline treeline-far"><ellipse cx="110" cy="272" rx="34" ry="26"/><ellipse cx="150" cy="262" rx="26" ry="22"/><ellipse cx="470" cy="214" rx="30" ry="24"/><ellipse cx="505" cy="204" rx="24" ry="20"/><ellipse cx="930" cy="192" rx="32" ry="24"/><ellipse cx="968" cy="186" rx="22" ry="19"/><ellipse cx="1390" cy="178" rx="30" ry="22"/><ellipse cx="1426" cy="172" rx="24" ry="19"/></g>
+            <path class="hill hill-mid" d="M0 380C140 330 300 400 480 340C640 290 780 380 960 330C1120 285 1280 360 1440 320C1520 300 1570 310 1600 300V600H0Z"/>
+            <g class="treeline treeline-mid"><ellipse cx="230" cy="368" rx="44" ry="34"/><ellipse cx="282" cy="356" rx="32" ry="26"/><ellipse cx="760" cy="346" rx="40" ry="32"/><ellipse cx="806" cy="338" rx="30" ry="24"/><ellipse cx="1210" cy="322" rx="42" ry="33"/><ellipse cx="1258" cy="314" rx="30" ry="25"/></g>
+            <path class="hill hill-near" d="M0 470C200 430 380 480 600 450C800 420 1000 470 1200 440C1360 420 1500 440 1600 430V600H0Z"/>
+            <use class="flora-fg" href="#h-hierba" transform="translate(300 600) scale(1.7) translate(-80 -110)"/>
+            <use class="flora-fg" href="#h-hierba" transform="translate(1040 604) scale(1.5) translate(-80 -110)"/>
+            <use class="flora-fg flora-fg-left" href="#h-ramita" transform="translate(70 640) rotate(-9) scale(2.25) translate(-100 -250)"/>
+            <use class="flora-fg flora-fg-left flora-fg-small" href="#h-ramita" transform="translate(250 650) rotate(10) scale(1.35) translate(-100 -250)"/>
+            <use class="flora-fg flora-fg-right" href="#h-ramita" transform="translate(1540 640) rotate(10) scale(-2.25 2.25) translate(-100 -250)"/>
+            <use class="flora-fg flora-fg-right flora-fg-small" href="#h-ramita" transform="translate(1360 652) rotate(-12) scale(-1.4 1.4) translate(-100 -250)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stage-scrim" aria-hidden="true"></div>
+      <div class="instrument-frame" aria-hidden="true">
+        <span class="frame-corner corner-tl"></span><span class="frame-corner corner-tr"></span><span class="frame-corner corner-bl"></span><span class="frame-corner corner-br"></span>
+        <span class="instrument-code">Folio 01 · Observatorio</span>
+      </div>
+
+      <div class="stage-top">
+        <div class="experience-copy">
+          <p class="experience-eyebrow">Un día en <span>{{ settings.site_name }}</span></p>
+          <h1 id="experience-title">El ambiente cambia.<br><em>Recórrelo.</em></h1>
+          <p id="experience-description">Reproduce las lecturas del periodo o mueve la línea temporal. El paisaje es una traducción artística de luz, humedad y temperatura: una interpretación, no un diagnóstico ni una medición del cielo.</p>
+          <div class="experience-state" id="experience-state" role="status"><span aria-hidden="true"></span><b>Preparando el recorrido</b></div>
+        </div>
+
+        <aside class="reading-glass" aria-label="Muestra seleccionada">
+          <p class="glass-kicker">Muestra seleccionada</p>
+          <div class="reading-moment"><span id="experience-date">Esperando datos</span><strong id="experience-time" class="num">—:—</strong></div>
+          <div class="experience-metrics">
+            <div id="experience-temperature"><span>Temperatura</span><strong><b id="experience-temperature-value" class="num">—</b> <small>°C</small></strong><em hidden>Efecto visual limitado</em></div>
+            <div id="experience-humidity"><span>Humedad</span><strong><b id="experience-humidity-value" class="num">—</b> <small>%</small></strong><em hidden>Efecto visual limitado</em></div>
+            <div id="experience-light"><span>Iluminancia</span><strong><b id="experience-light-value" class="num">—</b> <small>lx</small></strong><em hidden>Efecto visual limitado</em></div>
+          </div>
+          <p class="reading-source" id="experience-source">Los valores conservan la lectura recibida por el servidor.</p>
+        </aside>
+      </div>
+
+      <div class="stage-mid">
+        <div class="node-presence" aria-hidden="true">
+          <div class="node-signal"><i></i><i></i><i></i></div>
+          <div class="node-body"><span></span><svg viewBox="0 0 30 30"><path d="M24 5C11 5 5 11 6 23c10 1 17-5 18-18ZM7 23c4-6 8-10 14-13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><b>EcoNodo</b></div>
+          <p>Una lectura, un instante</p>
+        </div>
+      </div>
+
+      <div class="time-console">
+        <div class="console-top">
+          <div class="experience-periods" role="group" aria-label="Periodo del recorrido">
+            <button type="button" data-experience-period="hoy" class="active" aria-pressed="true">Hoy</button>
+            <button type="button" data-experience-period="24h" aria-pressed="false">24 horas</button>
+          </div>
+          <p id="experience-progress">Cargando historial…</p>
+          <button type="button" class="play-control" id="experience-play" aria-pressed="false" disabled><span aria-hidden="true">▶</span> Reproducir el día</button>
+        </div>
+        <label class="timeline-label" for="experience-timeline">Momento del recorrido</label>
+        <div class="timeline-row"><span id="timeline-start" class="num">—</span><input id="experience-timeline" type="range" min="0" max="0" value="0" disabled><span id="timeline-end" class="num">—</span></div>
+        <div class="quality-row"><span id="experience-quality">Validando las lecturas antes de representarlas.</span><button type="button" id="quality-details" aria-expanded="false" aria-controls="quality-explanation">Cómo se protege la escena</button></div>
+        <p id="quality-explanation" class="quality-explanation" hidden>Los valores no numéricos o fuera del contrato se excluyen. Los valores válidos pero extremos se muestran completos en cifras y se limitan solo al calcular colores, niebla, luz y movimiento.</p>
+      </div>
+
+      <div class="experience-error" id="experience-error" role="alert" hidden><strong>No pudimos abrir el recorrido.</strong><span>El diario principal sigue disponible.</span><button type="button" id="experience-retry">Intentar de nuevo</button></div>
+    </section>
+    <noscript><p class="noscript-message">Esta experiencia necesita JavaScript. El dashboard y el historial siguen disponibles en la página principal.</p></noscript>
+  </main>
+</body>
+</html>
